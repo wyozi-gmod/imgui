@@ -106,6 +106,24 @@ Whether player is pressed during this frame. This is guaranteed to only be calle
 local pressed = imgui.IsPressed()
 ```
 
+#### UI functions (prefixed by x to separate them from core functionality)
+
+Draws a rectangle button without any text or content
+```lua
+local wasPressed = imgui.xButton(x, y, w, h, borderWidth)
+```
+
+Draws a button with text inside. The `font` parameter is passed through `imgui.xFont`, so special font syntax is supported.
+The text is automatically centered within the button.
+```lua
+local wasPressed = imgui.xButton(text, font, x, y, w, h)
+```
+
+Draws a cursor IF the cursor is within given bounds
+```lua
+imgui.xCursor(x, y, w, h)
+```
+
 #### Utility
 Retrieves font name usable for Garry's Mod functions based on parameter. See __Special font API__ section below
 ```lua
