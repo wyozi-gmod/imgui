@@ -133,6 +133,40 @@ function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
 	return imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
 end
 
+function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
+	local ent = gState.entity
+	if IsValid(ent) then
+		-- make sure we're not applying same expansion twice
+		local expansion = ent._imguiRBExpansion
+		if expansion then
+			local ex, ey, ew, eh = unpack(expansion)
+			if ex == x and ey == y and ew == w and eh == h then
+				return
+			end
+		end
+		
+		local pos = gState.pos
+		local fwd, right = gState.angles:Forward(), gState.angles:Right()
+		local scale = gState.scale
+		local firstCorner, secondCorner =
+			pos + fwd * x * scale + right * y * scale,
+			pos + fwd * (x+w) * scale + right * (y+h) * scale
+			
+		local minrb, maxrb = Vector(math.huge, math.huge, math.huge), Vector(-math.huge, -math.huge, -math.huge)
+		
+		minrb.x = math.min(minrb.x, firstCorner.x, secondCorner.x)
+		minrb.y = math.min(minrb.y, firstCorner.y, secondCorner.y)
+		minrb.z = math.min(minrb.z, firstCorner.z, secondCorner.z)
+		maxrb.x = math.max(maxrb.x, firstCorner.x, secondCorner.x)
+		maxrb.y = math.max(maxrb.y, firstCorner.y, secondCorner.y)
+		maxrb.z = math.max(maxrb.z, firstCorner.z, secondCorner.z)
+		
+		ent:SetRenderBoundsWS(minrb, maxrb)
+		
+		ent._imguiRBExpansion = {x, y, w, h}
+	end
+end
+
 function imgui.End3D2D()
 	if gState then
 		gState.rendering = false
