@@ -65,3 +65,71 @@ function ENT:DrawTranslucent()
   end
 end
 ```
+
+### API
+
+#### 3D2D Context
+Start 3D2D context 
+```lua
+imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
+```
+
+Start 3D2D context on an entity. `pos`/`angles` are automatically transformed from local coordinates into world coordinates.
+
+```lua
+imgui.Entity3D2D(ent, lpos, lang, scale, distanceHide, distanceFadeStart)
+```
+
+Ends 3D2D Context
+```lua
+imgui.End3D2D()
+```
+
+#### Cursor
+Retrieves cursor position in 3D2D space. `mx`/`my` are null if player is not looking at the interface
+```lua
+local mx, my = imgui.CursorPos()
+```
+
+Whether player's 3D2D cursor is within given bounds
+```lua
+local hovering = imgui.IsHovering(x, y, w, h)
+```
+
+Whether player is currently pressing
+```lua
+local pressing = imgui.IsPressing()
+```
+
+Whether player is pressed during this frame. This is guaranteed to only be called once per click
+```lua
+local pressed = imgui.IsPressed()
+```
+
+#### Utility
+Retrieves font name usable for Garry's Mod functions based on parameter. See __Special font API__ section below
+```lua
+local fontName = imgui.xFont("!Roboto@24")
+```
+
+Expands the entity's render bounds to cover the whole rectangle passed as 3D2D coordinates
+(only usable inside `imgui.Entity3D2D` block, before `imgui.End3D2D` call)
+```lua
+imgui.ExpandRenderBoundsFromRect(x, y, w, h)
+```
+
+### Error recovery
+
+One of the goals of the library is to not crash the client even if something throws an error during the 3D2D context. This is achieved by halting all rendering library-wide if we detect attempt at starting a new 3D2D context without never having called `End3D2D` in between.
+
+The recovery protocol triggers automatically if you try to nest 3D2D contexts due to error or any other reason. You'll be notified with a `[IMGUI] Starting a new IMGUI context when previous one is still rendering. Shutting down rendering pipeline to prevent crashes..` message in console if that happens. The only way to recover from this error state is to re-initialize the whole library to reset the internal global state of IMGUI. There is no programmatic way to do this at the moment, but you can re-save the `imgui.lua` to trigger Lua autorefresh on it, or just reimport it.
+
+### Special font API
+
+IMGUI comes with a simplified method for creating fonts. If you use the built-in functions, such as `imgui.xTextButton`, the passed font argument will automatically go through the font syntax parser, but you can also access it directly with `imgui.xFont`.
+
+Here's an example of using `imgui.xFont` for drawing normal text:
+```lua
+-- Draw 'Foo bar' using Roboto font at font size 30 at 0, 0
+draw.SimpleText("Foo bar", imgui.xFont("!Roboto@30"), 0, 0)
+```
