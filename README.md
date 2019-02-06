@@ -119,7 +119,7 @@ The text is automatically centered within the button.
 local wasPressed = imgui.xButton(text, font, x, y, w, h)
 ```
 
-Draws a cursor IF the cursor is within given bounds
+Draws a cursor IF the cursor is within given bounds. Note: `x`,`y`,`w`,`h` should be the bounds for your whole IMGUI interface, eg. `0, 0, 512, 512` if you draw into the 3d2d space within those bounds.
 ```lua
 imgui.xCursor(x, y, w, h)
 ```
@@ -130,7 +130,7 @@ Retrieves font name usable for Garry's Mod functions based on parameter. See __S
 local fontName = imgui.xFont("!Roboto@24")
 ```
 
-Expands the entity's render bounds to cover the whole rectangle passed as 3D2D coordinates
+Expands the entity's render bounds to cover the whole rectangle passed as 3D2D coordinates. Note: `x`,`y`,`w`,`h` should be the bounds for your whole IMGUI interface, eg. `0, 0, 512, 512` if you draw into the 3d2d space within those bounds.
 (only usable inside `imgui.Entity3D2D` block, before `imgui.End3D2D` call)
 ```lua
 imgui.ExpandRenderBoundsFromRect(x, y, w, h)
