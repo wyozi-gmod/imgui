@@ -92,7 +92,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 		
 		if _devMode then
 			gState._devDist = distance
-			gState._devDistHideFrac = distance / distanceHide
+			gState._devHideDist = distanceHide
 		end
 		
 		if distanceHide and distanceFadeStart and distance > distanceFadeStart then
@@ -215,7 +215,7 @@ local function drawDeveloperInfo()
 	
 	local pos = gState.pos
 	draw.SimpleText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), "DefaultFixedDropShadow", 0, 45, nil, TEXT_ALIGN_CENTER, nil)
-	draw.SimpleText(string.format("distance %.2f - %d%%", gState._devDist or 0, 100-(gState._devDistHideFrac or 0)*100), "DefaultFixedDropShadow", 0, 58, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("distance %.2f / %.2f", gState._devDist or 0, gState._devHideDist or 0), "DefaultFixedDropShadow", 0, 58, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
 	
 	local ang = gState.angles
 	draw.SimpleText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), "DefaultFixedDropShadow", 0, 80, nil, TEXT_ALIGN_CENTER, nil)
