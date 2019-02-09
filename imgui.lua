@@ -158,6 +158,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 end
 
 function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
+	gState.entity = ent
 	return imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
 end
 
@@ -190,8 +191,15 @@ function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 		maxrb.z = math.max(maxrb.z, firstCorner.z, secondCorner.z)
 		
 		ent:SetRenderBoundsWS(minrb, maxrb)
+		if _devMode then
+			print("[IMGUI] Updated renderbounds of ", ent, " to ", minrb, "x", maxrb)
+		end
 		
 		ent._imguiRBExpansion = {x, y, w, h}
+	else
+		if _devMode then
+			print("[IMGUI] Attempted to update renderbounds when entity is not valid!! ", debug.traceback())
+		end
 	end
 end
 
