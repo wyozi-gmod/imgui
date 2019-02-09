@@ -162,6 +162,26 @@ function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
 	return imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
 end
 
+local function calculateRenderBounds(x, y, w, h)
+	local pos = gState.pos
+	local fwd, right = gState.angles:Forward(), gState.angles:Right()
+	local scale = gState.scale
+	local firstCorner, secondCorner =
+		pos + fwd * x * scale + right * y * scale,
+		pos + fwd * (x+w) * scale + right * (y+h) * scale
+		
+	local minrb, maxrb = Vector(math.huge, math.huge, math.huge), Vector(-math.huge, -math.huge, -math.huge)
+	
+	minrb.x = math.min(minrb.x, firstCorner.x, secondCorner.x)
+	minrb.y = math.min(minrb.y, firstCorner.y, secondCorner.y)
+	minrb.z = math.min(minrb.z, firstCorner.z, secondCorner.z)
+	maxrb.x = math.max(maxrb.x, firstCorner.x, secondCorner.x)
+	maxrb.y = math.max(maxrb.y, firstCorner.y, secondCorner.y)
+	maxrb.z = math.max(maxrb.z, firstCorner.z, secondCorner.z)
+	
+	return minrb, maxrb
+end
+
 function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 	local ent = gState.entity
 	if IsValid(ent) then
@@ -174,21 +194,7 @@ function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 			end
 		end
 		
-		local pos = gState.pos
-		local fwd, right = gState.angles:Forward(), gState.angles:Right()
-		local scale = gState.scale
-		local firstCorner, secondCorner =
-			pos + fwd * x * scale + right * y * scale,
-			pos + fwd * (x+w) * scale + right * (y+h) * scale
-			
-		local minrb, maxrb = Vector(math.huge, math.huge, math.huge), Vector(-math.huge, -math.huge, -math.huge)
-		
-		minrb.x = math.min(minrb.x, firstCorner.x, secondCorner.x)
-		minrb.y = math.min(minrb.y, firstCorner.y, secondCorner.y)
-		minrb.z = math.min(minrb.z, firstCorner.z, secondCorner.z)
-		maxrb.x = math.max(maxrb.x, firstCorner.x, secondCorner.x)
-		maxrb.y = math.max(maxrb.y, firstCorner.y, secondCorner.y)
-		maxrb.z = math.max(maxrb.z, firstCorner.z, secondCorner.z)
+		local minrb, maxrb = calculateRenderBounds(x, y, w, h)
 		
 		ent:SetRenderBoundsWS(minrb, maxrb)
 		if _devMode then
@@ -237,18 +243,25 @@ local function drawDeveloperInfo()
 	
 	cam.End3D2D()
 	cam.IgnoreZ(false)
+	
+	local ent = gState.entity
+	if IsValid(ent) and ent._imguiRBExpansion then
+		local ex, ey, ew, eh = unpack(ent._imguiRBExpansion)
+		local minrb, maxrb = calculateRenderBounds(ex, ey, ew, eh)
+		render.DrawWireframeBox(Vector(0, 0, 0), Angle(0, 0, 0), minrb, maxrb, Color(0, 0, 255))
+	end
 end
 
 function imgui.End3D2D()
 	if gState then
-		if _devMode then
-			drawDeveloperInfo()
-		end
-		
 		gState.rendering = false
 		cam.End3D2D()
 		render.SetBlend(1)
 		surface.SetAlphaMultiplier(1)
+		
+		if _devMode then
+			drawDeveloperInfo()
+		end
 	end
 end
 
