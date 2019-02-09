@@ -12,6 +12,13 @@ imgui.skin = {
 	foregroundPress = Color(220, 80, 0),
 }
 
+local devCvar = GetConVar("developer")
+function imgui.IsDeveloperMode()
+	return not imgui.DisableDeveloperMode and devCvar:GetInt() > 0
+end
+
+local _devMode = false -- cached local variable updated once in a while
+
 function imgui.Hook(name, id, callback)
 	local hookUniqifier = debug.getinfo(1).short_src
 	hook.Add(name, "IMGUI / " .. id .. " / " .. hookUniqifier, callback)
@@ -39,7 +46,12 @@ local function isObstructed(eyepos, hitPos)
 		q.filter = { LocalPlayer() }
 	end
 
-	return util.TraceLine(q).Hit
+	local tr = util.TraceLine(q)
+	if tr.Hit then
+		return true, tr.Entity
+	else
+		return false
+	end
 end
 
 function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
@@ -53,13 +65,17 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 		return false
 	end
 	
+	_devMode = imgui.IsDeveloperMode()
+	
 	local eyePos = LocalPlayer():EyePos()
 	local eyePosToPos = pos - eyePos
-		
+	
 	-- OPTIMIZATION: Test that we are in front of the UI
 	do
 		local normal = angles:Up()
 		local dot = eyePosToPos:Dot(normal)
+		
+		if _devMode then gState._devDot = dot end
 		
 		-- since normal is pointing away from surface towards viewer, dot<0 is visible
 		if dot >= 0 then
@@ -72,6 +88,11 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 		local distance = eyePosToPos:Length()
 		if distance > distanceHide then
 			return false
+		end
+		
+		if _devMode then
+			gState._devDist = distance
+			gState._devDistHideFrac = distance / distanceHide
 		end
 		
 		if distanceHide and distanceFadeStart and distance > distanceFadeStart then
@@ -104,9 +125,12 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 	
 		local hitPos = util.IntersectRayWithPlane(eyepos, eyenormal, pos, planeNormal)
 		if hitPos then
-			if isObstructed(eyepos, hitPos) then
+			local obstructed, obstructer = isObstructed(eyepos, hitPos)
+			if obstructed then
 				gState.mx = nil
 				gState.my = nil
+				
+				if _devMode then gState._devInputBlocker = "collision " .. obstructer:GetClass() .. "/" .. obstructer:EntIndex() end
 			else
 				local diff = pos - hitPos
 	
@@ -120,10 +144,14 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 		else
 			gState.mx = nil
 			gState.my = nil
+			
+			if _devMode then gState._devInputBlocker = "not looking at plane" end
 		end
 	else
 		gState.mx = nil
 		gState.my = nil
+		
+		if _devMode then gState._devInputBlocker = "not hovering world" end
 	end
 	
 	return true
@@ -167,8 +195,48 @@ function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 	end
 end
 
+local function drawDeveloperInfo()
+	local ang = LocalPlayer():EyeAngles()
+	ang:RotateAroundAxis(ang:Right(), 90)
+	ang:RotateAroundAxis(ang:Up(), -90)
+	
+	cam.IgnoreZ(true)
+	cam.Start3D2D(gState.pos + Vector(0, 0, 30), ang, 0.15)
+	surface.SetDrawColor(0, 0, 0, 200)
+	surface.DrawRect(-100, 0, 200, 125)
+	draw.SimpleText("imgui developer", "DefaultFixedDropShadow", 0, 5, Color(78, 205, 196), TEXT_ALIGN_CENTER, nil)
+	
+	local mx, my = gState.mx, gState.my
+	if mx and my then
+		draw.SimpleText(string.format("mouse: hovering %d x %d", mx, my), "DefaultFixedDropShadow", 0, 25, Color(0, 255, 0), TEXT_ALIGN_CENTER, nil)
+	else
+		draw.SimpleText(string.format("mouse: %s", gState._devInputBlocker or ""), "DefaultFixedDropShadow", 0, 25, Color(255, 0, 0), TEXT_ALIGN_CENTER, nil)
+	end
+	
+	local pos = gState.pos
+	draw.SimpleText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), "DefaultFixedDropShadow", 0, 45, nil, TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("distance %.2f - %d%%", gState._devDist or 0, 100-(gState._devDistHideFrac or 0)*100), "DefaultFixedDropShadow", 0, 58, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	
+	local ang = gState.angles
+	draw.SimpleText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), "DefaultFixedDropShadow", 0, 80, nil, TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("dot %d", gState._devDot or 0), "DefaultFixedDropShadow", 0, 93, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	
+	local angToEye = (pos - LocalPlayer():EyePos()):Angle()
+	angToEye:RotateAroundAxis(ang:Up(), -90)
+	angToEye:RotateAroundAxis(ang:Right(), 90)
+	
+	draw.SimpleText(string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r), "DefaultFixedDropShadow", 0, 106, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	
+	cam.End3D2D()
+	cam.IgnoreZ(false)
+end
+
 function imgui.End3D2D()
 	if gState then
+		if _devMode then
+			drawDeveloperInfo()
+		end
+		
 		gState.rendering = false
 		cam.End3D2D()
 		render.SetBlend(1)
