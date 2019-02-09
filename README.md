@@ -66,6 +66,17 @@ function ENT:DrawTranslucent()
 end
 ```
 
+### Debugging
+
+![image](https://i.imgur.com/XT7cLdT.png)
+
+Setting the `developer` convar to non-zero value draws a debugging panel on top of each IMGUI panel you draw. It shows few pieces of useful information:
+- The mouse coordinates or the reason why input is not enabled at the moment
+- World position of the TDUI panel, our distance from it and the distance at which the interface is hidden
+- World angles of the TDUI panel, the dot product between eye position and the panel and the angle between eye position and the panel
+
+If you wish to hide the developer panel even with `developer` cvar, set `imgui.DisableDeveloperMode = true` right after importing the library.
+
 ### API
 
 #### 3D2D Context
