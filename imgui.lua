@@ -154,6 +154,8 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 		if _devMode then gState._devInputBlocker = "not hovering world" end
 	end
 	
+	if _devMode then gState._renderStarted = SysTime() end
+	
 	return true
 end
 
@@ -217,29 +219,33 @@ local function drawDeveloperInfo()
 	cam.IgnoreZ(true)
 	cam.Start3D2D(gState.pos + Vector(0, 0, 30), ang, 0.15)
 	surface.SetDrawColor(0, 0, 0, 200)
-	surface.DrawRect(-100, 0, 200, 125)
+	surface.DrawRect(-100, 0, 200, 140)
 	draw.SimpleText("imgui developer", "DefaultFixedDropShadow", 0, 5, Color(78, 205, 196), TEXT_ALIGN_CENTER, nil)
+	surface.SetDrawColor(78, 205, 196)
+	surface.DrawLine(-50, 16, 50, 16)
 	
 	local mx, my = gState.mx, gState.my
 	if mx and my then
-		draw.SimpleText(string.format("mouse: hovering %d x %d", mx, my), "DefaultFixedDropShadow", 0, 25, Color(0, 255, 0), TEXT_ALIGN_CENTER, nil)
+		draw.SimpleText(string.format("mouse: hovering %d x %d", mx, my), "DefaultFixedDropShadow", 0, 20, Color(0, 255, 0), TEXT_ALIGN_CENTER, nil)
 	else
-		draw.SimpleText(string.format("mouse: %s", gState._devInputBlocker or ""), "DefaultFixedDropShadow", 0, 25, Color(255, 0, 0), TEXT_ALIGN_CENTER, nil)
+		draw.SimpleText(string.format("mouse: %s", gState._devInputBlocker or ""), "DefaultFixedDropShadow", 0, 20, Color(255, 0, 0), TEXT_ALIGN_CENTER, nil)
 	end
 	
 	local pos = gState.pos
-	draw.SimpleText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), "DefaultFixedDropShadow", 0, 45, nil, TEXT_ALIGN_CENTER, nil)
-	draw.SimpleText(string.format("distance %.2f / %.2f", gState._devDist or 0, gState._devHideDist or 0), "DefaultFixedDropShadow", 0, 58, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), "DefaultFixedDropShadow", 0, 40, nil, TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("distance %.2f / %.2f", gState._devDist or 0, gState._devHideDist or 0), "DefaultFixedDropShadow", 0, 53, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
 	
 	local ang = gState.angles
-	draw.SimpleText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), "DefaultFixedDropShadow", 0, 80, nil, TEXT_ALIGN_CENTER, nil)
-	draw.SimpleText(string.format("dot %d", gState._devDot or 0), "DefaultFixedDropShadow", 0, 93, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), "DefaultFixedDropShadow", 0, 75, nil, TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("dot %d", gState._devDot or 0), "DefaultFixedDropShadow", 0, 88, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
 	
 	local angToEye = (pos - LocalPlayer():EyePos()):Angle()
 	angToEye:RotateAroundAxis(ang:Up(), -90)
 	angToEye:RotateAroundAxis(ang:Right(), 90)
 	
-	draw.SimpleText(string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r), "DefaultFixedDropShadow", 0, 106, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	draw.SimpleText(string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r), "DefaultFixedDropShadow", 0, 100, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	
+	draw.SimpleText(string.format("rendertime avg: %.2fms", (gState._devBenchAveraged or 0) * 1000), "DefaultFixedDropShadow", 0, 120, nil, TEXT_ALIGN_CENTER, nil)
 	
 	cam.End3D2D()
 	cam.IgnoreZ(false)
@@ -254,6 +260,17 @@ end
 
 function imgui.End3D2D()
 	if gState then
+		if _devMode then
+			local renderTook = SysTime() - gState._renderStarted
+			gState._devBenchTests = (gState._devBenchTests or 0) + 1
+			gState._devBenchTaken = (gState._devBenchTaken or 0) + renderTook
+			if gState._devBenchTests == 100 then
+				gState._devBenchAveraged = gState._devBenchTaken / 100
+				gState._devBenchTests = 0
+				gState._devBenchTaken = 0
+			end
+		end
+		
 		gState.rendering = false
 		cam.End3D2D()
 		render.SetBlend(1)
