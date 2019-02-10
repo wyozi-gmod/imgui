@@ -10,8 +10,11 @@ Immediate mode 3D2D UI for Garry's Mod
 
 ### Installation
 
-Place `imgui.lua` somewhere where it's accessible by client.
-Include with `myimguireference = include("imgui.lua")`, and use through the `myimguireference` object.
+Place `imgui.lua` somewhere in your addon or gamemode, eg. `myaddon/lua/myaddon/imgui.lua`.
+
+On _SERVER_ do `AddCSLuaFile("imgui.lua")`
+
+On _CLIENT_ (where you want to use imgui) do `local imgui = include("imgui.lua")`, and use through `imgui` object
 
 ### Example
 
