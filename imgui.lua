@@ -24,12 +24,6 @@ function imgui.Hook(name, id, callback)
 	hook.Add(name, "IMGUI / " .. id .. " / " .. hookUniqifier, callback)
 end
 
-hook.Add("NotifyShouldTransmit", "IMGUI / ClearRenderBounds", function(ent, shouldTransmit)
-	if shouldTransmit and ent._imguiRBExpansion then
-		ent._imguiRBExpansion = nil
-	end
-end)
-
 local gState = {}
 
 imgui.Hook("PreRender", "Input", function()
@@ -39,6 +33,12 @@ imgui.Hook("PreRender", "Input", function()
 		local wasPressing = gState.pressing
 		gState.pressing = input.IsMouseDown(MOUSE_LEFT) or input.IsKeyDown(KEY_E)
 		gState.pressed = not wasPressing and gState.pressing
+	end
+end)
+
+hook.Add("NotifyShouldTransmit", "IMGUI / ClearRenderBounds", function(ent, shouldTransmit)
+	if shouldTransmit and ent._imguiRBExpansion then
+		ent._imguiRBExpansion = nil
 	end
 end)
 
