@@ -26,10 +26,23 @@ end
 
 local gState = {}
 
+local function shouldAcceptInput()
+	-- don't process input during non-main renderpass
+	if render.GetRenderTarget() ~= nil then
+		return false
+	end
+	
+	-- don't process input if we're doing VGUI stuff (and not in context menu)
+	if vgui.CursorVisible() and vgui.GetHoveredPanel() ~= g_ContextMenu then
+		return false
+	end
+	
+	return true
+end
+
 imgui.Hook("PreRender", "Input", function()
 	-- calculate mouse state
-	local isWorldRenderPass = render.GetRenderTarget() == nil
-	if isWorldRenderPass then
+	if shouldAcceptInput() then
 		local wasPressing = gState.pressing
 		gState.pressing = input.IsMouseDown(MOUSE_LEFT) or input.IsKeyDown(KEY_E)
 		gState.pressed = not wasPressing and gState.pressing
