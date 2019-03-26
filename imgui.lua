@@ -311,10 +311,10 @@ function imgui.IsHovering(x, y, w, h)
 	return mx and my and mx >= x and mx <= (x+w) and my >= y and my <= (y+h)
 end
 function imgui.IsPressing()
-	return gState.pressing
+	return shouldAcceptInput() and gState.pressing
 end
 function imgui.IsPressed()
-	return gState.pressed
+	return shouldAcceptInput() and gState.pressed
 end
 
 -- The cache that has String->Bool mappings telling if font has been created
@@ -369,11 +369,11 @@ function imgui.xButton(x, y, w, h, borderWidth)
 		surface.DrawTexturedRect(x+w-borderWidth, y, borderWidth, h)
 	end
 	
-	return imgui.IsHovering(x, y, w, h) and gState.pressed
+	return shouldAcceptInput() and imgui.IsHovering(x, y, w, h) and gState.pressed
 end
 
 function imgui.xCursor(x, y, w, h)
-	local fgColor = gState.pressing and imgui.skin.foregroundPress or imgui.skin.foreground
+	local fgColor = imgui.IsPressing() and imgui.skin.foregroundPress or imgui.skin.foreground
 	local mx, my = gState.mx, gState.my
 	
 	if not mx or not my then return end
