@@ -349,24 +349,23 @@ function imgui.xFont(font, defaultSize)
 	return font
 end
 
-local colorMat = Material("color")
 function imgui.xButton(x, y, w, h, borderWidth)
-	borderWidth = borderWidth or 1
+	local bw = borderWidth or 1
 	
 	local bgColor = imgui.IsHovering(x, y, w, h) and imgui.skin.backgroundHover or imgui.skin.background
 	local borderColor = imgui.IsHovering(x, y, w, h) and imgui.skin.borderHover or imgui.skin.border
 	
+	
 	surface.SetDrawColor(bgColor)
 	surface.DrawRect(x, y, w, h)
 	
-	if borderWidth > 0 then
+	if bw > 0 then
 		surface.SetDrawColor(borderColor)
-		surface.SetMaterial(colorMat)
 
-		surface.DrawTexturedRect(x, y, w, borderWidth)
-		surface.DrawTexturedRect(x, y, borderWidth, h)
-		surface.DrawTexturedRect(x, y+h-borderWidth, w, borderWidth)
-		surface.DrawTexturedRect(x+w-borderWidth, y, borderWidth, h)
+		surface.DrawRect(x, y, w, bw)
+		surface.DrawRect(x, y+bw, bw, h-bw*2)
+		surface.DrawRect(x, y+h-bw, w, bw)
+		surface.DrawRect(x+w-bw+1, y+bw, bw, h-bw*2)
 	end
 	
 	return shouldAcceptInput() and imgui.IsHovering(x, y, w, h) and gState.pressed
