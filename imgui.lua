@@ -6,10 +6,11 @@ imgui.skin = {
 	
 	border = Color(255, 255, 255),
 	borderHover = Color(255, 127, 0),
+	borderPress = Color(255, 80, 0),
 	
 	foreground = Color(255, 255, 255),
 	foregroundHover = Color(255, 127, 0),
-	foregroundPress = Color(220, 80, 0),
+	foregroundPress = Color(255, 80, 0),
 }
 
 local devCvar = GetConVar("developer")
@@ -349,11 +350,12 @@ function imgui.xFont(font, defaultSize)
 	return font
 end
 
-function imgui.xButton(x, y, w, h, borderWidth)
+function imgui.xButton(x, y, w, h, borderWidth, borderClr, hoverClr, pressColor)
 	local bw = borderWidth or 1
 	
 	local bgColor = imgui.IsHovering(x, y, w, h) and imgui.skin.backgroundHover or imgui.skin.background
-	local borderColor = imgui.IsHovering(x, y, w, h) and imgui.skin.borderHover or imgui.skin.border
+	local borderColor = ((imgui.IsPressing() and imgui.IsHovering(x, y, w, h)) and (pressColor or imgui.skin.borderPress)) or 
+	(imgui.IsHovering(x, y, w, h) and (hoverClr or imgui.skin.borderHover)) or (borderClr or imgui.skin.border)
 	
 	
 	surface.SetDrawColor(bgColor)
@@ -365,7 +367,7 @@ function imgui.xButton(x, y, w, h, borderWidth)
 		surface.DrawRect(x, y, w, bw)
 		surface.DrawRect(x, y+bw, bw, h-bw*2)
 		surface.DrawRect(x, y+h-bw, w, bw)
-		surface.DrawRect(x+w-bw+1, y+bw, bw, h-bw*2)
+		surface.DrawRect(x+w-bw+1, y, bw, h)
 	end
 	
 	return shouldAcceptInput() and imgui.IsHovering(x, y, w, h) and gState.pressed
@@ -386,10 +388,11 @@ function imgui.xCursor(x, y, w, h)
 	surface.DrawLine(mx, my - cursorSize, mx, my + cursorSize)
 end
 
-function imgui.xTextButton(text, font, x, y, w, h)
-	local fgColor = imgui.IsHovering(x, y, w, h) and imgui.skin.foregroundHover or imgui.skin.foreground
+function imgui.xTextButton(text, font, x, y, w, h, borderWidth, color, hoverClr, pressColor)
+	local fgColor = ((imgui.IsPressing() and imgui.IsHovering(x, y, w, h)) and (pressColor or imgui.skin.foregroundPress)) or 
+	(imgui.IsHovering(x, y, w, h) and (hoverClr or imgui.skin.foregroundHover)) or (color or imgui.skin.foreground)
 	
-	local clicked = imgui.xButton(x, y, w, h)
+	local clicked = imgui.xButton(x, y, w, h, borderWidth, color, hoverClr, pressColor)
 	
 	font = imgui.xFont(font, math.floor(h * 0.618))
 	draw.SimpleText(text, font, x+w/2, y+h/2, fgColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)

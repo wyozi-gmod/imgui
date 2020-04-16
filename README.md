@@ -42,7 +42,10 @@ hook.Add("PostDrawTranslucentRenderables", "PaintIMGUI", function(bDrawingSkybox
     -- The first argument is text to render inside button
     -- The second argument is special font syntax, that dynamically creates font "Roboto" at size 24
     -- The special syntax is just for convinience; you can use normal Garry's Mod font names in place
-    if imgui.xTextButton("Foo bar", "!Roboto@24", 0, 30, 100, 25) then
+    -- The third, fourth, fith and sixth arguments are for x, y, width and height
+    -- The seventh argument is the border width (optional)
+    -- The last 3 arguments are for color, hover color, and press color (optional)
+    if imgui.xTextButton("Foo bar", "!Roboto@24", 0, 30, 100, 25, 1, Color(255,255,255), Color(0,0,255), Color(255,0,0)) then
       -- the xTextButton function returns true, if user clicked on this area during this frame
       print("yay, we were clicked :D")
     end
@@ -125,13 +128,13 @@ local pressed = imgui.IsPressed()
 
 Draws a rectangle button without any text or content
 ```lua
-local wasPressed = imgui.xButton(x, y, w, h, borderWidth)
+local wasPressed = imgui.xButton(x, y, w, h, borderWidth, borderClr, hoverClr, pressColor)
 ```
 
 Draws a button with text inside. The `font` parameter is passed through `imgui.xFont`, so special font syntax is supported.
 The text is automatically centered within the button.
 ```lua
-local wasPressed = imgui.xButton(text, font, x, y, w, h)
+local wasPressed = imgui.xTextButton(text, font, x, y, w, h, color, hoverColor, pressColor)
 ```
 
 Draws a cursor IF the cursor is within given bounds. Note: `x`,`y`,`w`,`h` should be the bounds for your whole IMGUI interface, eg. `0, 0, 512, 512` if you draw into the 3d2d space within those bounds.
