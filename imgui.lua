@@ -318,13 +318,21 @@ function imgui.IsPressed()
 	return shouldAcceptInput() and gState.pressed
 end
 
--- The cache that has String->Bool mappings telling if font has been created
+-- String->Bool mappings for whether font has been created
 local _createdFonts = {}
+
+-- Cached IMGUIFontNamd->GModFontName
+local _imguiFontToGmodFont = {}
 
 local EXCLAMATION_BYTE = string.byte("!")
 function imgui.xFont(font, defaultSize)
 	-- special font
 	if string.byte(font, 1) == EXCLAMATION_BYTE then
+
+		local existingGFont = _imguiFontToGmodFont[font]
+		if existingGFont then
+			return existingGFont
+		end
 		
 		-- Font not cached; parse the font
 		local name, size = font:match("!([^@]+)@(.+)")
@@ -336,7 +344,7 @@ function imgui.xFont(font, defaultSize)
 		end
 		
 		local fontName = string.format("IMGUI_%s_%d", name, size)
-
+		_imguiFontToGmodFont[font] = fontName
 		if not _createdFonts[fontName] then
 			surface.CreateFont(fontName, {
 				font = name,
