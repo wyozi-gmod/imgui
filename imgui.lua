@@ -80,7 +80,10 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 	end
 	
 	if gState.rendering == true then
-		print("[IMGUI] Starting a new IMGUI context when previous one is still rendering. Shutting down rendering pipeline to prevent crashes..")
+		print(
+			"[IMGUI] Starting a new IMGUI context when previous one is still rendering" ..
+			"Shutting down rendering pipeline to prevent crashes.."
+		)
 		gState.shutdown = true
 		return false
 	end
@@ -231,6 +234,11 @@ function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 	end
 end
 
+local function developerText(str, x, y, clr)
+	draw.SimpleText(
+		str, "DefaultFixedDropShadow", x, y, clr, TEXT_ALIGN_CENTER, nil
+	)
+end
 local function drawDeveloperInfo()
 	local camAng = LocalPlayer():EyeAngles()
 	camAng:RotateAroundAxis(camAng:Right(), 90)
@@ -240,32 +248,41 @@ local function drawDeveloperInfo()
 	cam.Start3D2D(gState.pos + Vector(0, 0, 30), camAng, 0.15)
 	surface.SetDrawColor(0, 0, 0, 200)
 	surface.DrawRect(-100, 0, 200, 140)
-	draw.SimpleText("imgui developer", "DefaultFixedDropShadow", 0, 5, Color(78, 205, 196), TEXT_ALIGN_CENTER, nil)
+	developerText("imgui developer", 0, 5, Color(78, 205, 196))
 	surface.SetDrawColor(78, 205, 196)
 	surface.DrawLine(-50, 16, 50, 16)
 	
 	local mx, my = gState.mx, gState.my
 	if mx and my then
-		draw.SimpleText(string.format("mouse: hovering %d x %d", mx, my), "DefaultFixedDropShadow", 0, 20, Color(0, 255, 0), TEXT_ALIGN_CENTER, nil)
+		developerText(
+			string.format("mouse: hovering %d x %d", mx, my),
+			0, 20, Color(0, 255, 0)
+		)
 	else
-		draw.SimpleText(string.format("mouse: %s", gState._devInputBlocker or ""), "DefaultFixedDropShadow", 0, 20, Color(255, 0, 0), TEXT_ALIGN_CENTER, nil)
+		developerText(
+			string.format("mouse: %s", gState._devInputBlocker or ""),
+			0, 20, Color(255, 0, 0)
+		)
 	end
 	
 	local pos = gState.pos
-	draw.SimpleText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), "DefaultFixedDropShadow", 0, 40, nil, TEXT_ALIGN_CENTER, nil)
-	draw.SimpleText(string.format("distance %.2f / %.2f", gState._devDist or 0, gState._devHideDist or 0), "DefaultFixedDropShadow", 0, 53, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	developerText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), 0, 40)
+	developerText(
+		string.format("distance %.2f / %.2f", gState._devDist or 0, gState._devHideDist or 0),
+		0, 53, Color(200, 200, 200, 200)
+	)
 	
 	local ang = gState.angles
-	draw.SimpleText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), "DefaultFixedDropShadow", 0, 75, nil, TEXT_ALIGN_CENTER, nil)
-	draw.SimpleText(string.format("dot %d", gState._devDot or 0), "DefaultFixedDropShadow", 0, 88, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	developerText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), 0, 75)
+	developerText(string.format("dot %d", gState._devDot or 0), 0, 88, Color(200, 200, 200, 200))
 	
 	local angToEye = (pos - LocalPlayer():EyePos()):Angle()
 	angToEye:RotateAroundAxis(ang:Up(), -90)
 	angToEye:RotateAroundAxis(ang:Right(), 90)
 	
-	draw.SimpleText(string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r), "DefaultFixedDropShadow", 0, 100, Color(200, 200, 200, 200), TEXT_ALIGN_CENTER, nil)
+	developerText(string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r), 0, 100)
 	
-	draw.SimpleText(string.format("rendertime avg: %.2fms", (gState._devBenchAveraged or 0) * 1000), "DefaultFixedDropShadow", 0, 120, nil, TEXT_ALIGN_CENTER, nil)
+	developerText(string.format("rendertime avg: %.2fms", (gState._devBenchAveraged or 0) * 1000), 0, 120)
 	
 	cam.End3D2D()
 	cam.IgnoreZ(false)
@@ -362,8 +379,10 @@ function imgui.xButton(x, y, w, h, borderWidth, borderClr, hoverClr, pressColor)
 	local bw = borderWidth or 1
 	
 	local bgColor = imgui.IsHovering(x, y, w, h) and imgui.skin.backgroundHover or imgui.skin.background
-	local borderColor = ((imgui.IsPressing() and imgui.IsHovering(x, y, w, h)) and (pressColor or imgui.skin.borderPress)) or 
-	(imgui.IsHovering(x, y, w, h) and (hoverClr or imgui.skin.borderHover)) or (borderClr or imgui.skin.border)
+	local borderColor =
+		((imgui.IsPressing() and imgui.IsHovering(x, y, w, h)) and (pressColor or imgui.skin.borderPress))
+		or (imgui.IsHovering(x, y, w, h) and (hoverClr or imgui.skin.borderHover))
+		or (borderClr or imgui.skin.border)
 	
 	
 	surface.SetDrawColor(bgColor)
@@ -397,8 +416,10 @@ function imgui.xCursor(x, y, w, h)
 end
 
 function imgui.xTextButton(text, font, x, y, w, h, borderWidth, color, hoverClr, pressColor)
-	local fgColor = ((imgui.IsPressing() and imgui.IsHovering(x, y, w, h)) and (pressColor or imgui.skin.foregroundPress)) or 
-	(imgui.IsHovering(x, y, w, h) and (hoverClr or imgui.skin.foregroundHover)) or (color or imgui.skin.foreground)
+	local fgColor =
+		((imgui.IsPressing() and imgui.IsHovering(x, y, w, h)) and (pressColor or imgui.skin.foregroundPress))
+		or (imgui.IsHovering(x, y, w, h) and (hoverClr or imgui.skin.foregroundHover))
+		or (color or imgui.skin.foreground)
 	
 	local clicked = imgui.xButton(x, y, w, h, borderWidth, color, hoverClr, pressColor)
 	
