@@ -1,0 +1,16 @@
+name: Luacheck
+
+on:
+  - push
+
+jobs:
+  luacheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: leafo/gh-actions-lua@v5
+      - uses: leafo/gh-actions-luarocks@v2
+      - name: Install luacheck
+        run: luarocks install luacheck
+      - name: Luacheck
+        run: luacheck imgui.lua
