@@ -232,12 +232,12 @@ function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 end
 
 local function drawDeveloperInfo()
-	local ang = LocalPlayer():EyeAngles()
-	ang:RotateAroundAxis(ang:Right(), 90)
-	ang:RotateAroundAxis(ang:Up(), -90)
+	local camAng = LocalPlayer():EyeAngles()
+	camAng:RotateAroundAxis(camAng:Right(), 90)
+	camAng:RotateAroundAxis(camAng:Up(), -90)
 	
 	cam.IgnoreZ(true)
-	cam.Start3D2D(gState.pos + Vector(0, 0, 30), ang, 0.15)
+	cam.Start3D2D(gState.pos + Vector(0, 0, 30), camAng, 0.15)
 	surface.SetDrawColor(0, 0, 0, 200)
 	surface.DrawRect(-100, 0, 200, 140)
 	draw.SimpleText("imgui developer", "DefaultFixedDropShadow", 0, 5, Color(78, 205, 196), TEXT_ALIGN_CENTER, nil)
