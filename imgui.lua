@@ -73,7 +73,7 @@ local function isObstructed(eyePos, hitPos, ignoredEntity)
 	end
 end
 
-function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart, ignoreEntity)
+function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 	if gState.shutdown == true then
 		return
 	end
@@ -144,7 +144,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart, ig
 	
 		local hitPos = util.IntersectRayWithPlane(eyepos, eyenormal, pos, planeNormal)
 		if hitPos then
-			local obstructed, obstructer = isObstructed(eyepos, hitPos, ignoreEntity)
+			local obstructed, obstructer = isObstructed(eyepos, hitPos, gState.entity)
 			if obstructed then
 				gState.mx = nil
 				gState.my = nil
@@ -180,7 +180,9 @@ end
 
 function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
 	gState.entity = ent
-	return imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
+	local ret = imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
+	gState.entity = nil
+	return ret
 end
 
 local function calculateRenderBounds(x, y, w, h)
