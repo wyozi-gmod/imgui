@@ -57,15 +57,14 @@ hook.Add("NotifyShouldTransmit", "IMGUI / ClearRenderBounds", function(ent, shou
 end)
 
 local traceResultTable = {}
-local traceQueryTable = { output = traceResultTable }
-local function isObstructed(eyepos, hitPos)
+local traceQueryTable = { output = traceResultTable, filter = {} }
+local function isObstructed(eyePos, hitPos, ignoredEntity)
 	local q = traceQueryTable
-	q.start = eyepos
+	q.start = eyePos
 	q.endpos = hitPos
-	if not q.filter then
-		q.filter = { LocalPlayer() }
-	end
-
+	q.filter[1] = LocalPlayer()
+	q.filter[2] = ignoredEntity
+	
 	local tr = util.TraceLine(q)
 	if tr.Hit then
 		return true, tr.Entity
@@ -148,7 +147,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 	
 		local hitPos = util.IntersectRayWithPlane(eyepos, eyenormal, pos, planeNormal)
 		if hitPos then
-			local obstructed, obstructer = isObstructed(eyepos, hitPos)
+			local obstructed, obstructer = isObstructed(eyepos, hitPos, gState.entity)
 			if obstructed then
 				gState.mx = nil
 				gState.my = nil
@@ -184,7 +183,9 @@ end
 
 function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
 	gState.entity = ent
-	return imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
+	local ret = imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
+	gState.entity = nil
+	return ret
 end
 
 local function calculateRenderBounds(x, y, w, h)

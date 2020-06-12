@@ -92,7 +92,7 @@ Start 3D2D context
 imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 ```
 
-Start 3D2D context on an entity. `pos`/`angles` are automatically transformed from local coordinates into world coordinates.
+Start 3D2D context on an entity. `pos`/`angles` are automatically transformed from local coordinates into world coordinates and the entity will be ignored in obstruction checks.
 
 ```lua
 imgui.Entity3D2D(ent, lpos, lang, scale, distanceHide, distanceFadeStart)
