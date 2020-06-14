@@ -1,5 +1,5 @@
 # imgui
-Immediate mode 3D2D UI for Garry's Mod. See examples [here](https://github.com/wyozi-gmod/imgui/issues/2).
+Immediate mode 3D2D UI for Garry's Mod. See some real-world uses [here](https://github.com/wyozi-gmod/imgui/issues/2).
 
 ### Features
 
