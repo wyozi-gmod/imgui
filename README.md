@@ -169,3 +169,55 @@ Here's an example of using `imgui.xFont` for drawing normal text:
 -- Draw 'Foo bar' using Roboto font at font size 30 at 0, 0
 draw.SimpleText("Foo bar", imgui.xFont("!Roboto@30"), 0, 0)
 ```
+
+### Networking data
+
+You'll probably want to network data from client to server on button press or other clientside action at some point. IMGUI doesn't support this by itself, but [netdata](https://github.com/wyozi-gmod/netdata) is a pretty good fit for entity-based UIs.
+
+Here's an example entity with IMGUI + netdata:
+```lua
+ENT.Type = "anim"
+
+if SERVER then
+    function ENT:Initialize()
+        self:SetModel("models/props_phx/construct/glass/glass_plate1x1.mdl")
+        self:PhysicsInit(SOLID_VPHYSICS)
+        self.Greeters = {} 
+    end
+
+    function ENT:ReceiveNetAction(cl)
+        table.insert(self.Greeters, cl:Nick())
+        self:NetDataUpdate()
+    end
+    
+    function ENT:NetDataWrite()
+        net.WriteTable(self.Greeters)
+    end
+end
+if CLIENT then
+    ENT.RenderGroup = RENDERGROUP_BOTH
+
+    function ENT:NetDataRead()
+        self.Greeters = net.ReadTable()
+    end
+
+    function ENT:DrawTranslucent()
+        local imgui = resort.bar.imgui
+
+        if imgui.Entity3D2D(self, Vector(0, 0, 3.5), Angle(0, 0, 0), 0.1) then
+            if imgui.xTextButton("Say hello", "!Roboto@24", -100, -200, 200, 50, 1) then
+                self:StartNetAction()
+                net.SendToServer()
+            end
+
+            if self.Greeters then
+                for i, nick in pairs(self.Greeters) do
+                    draw.SimpleText(nick, "DermaLarge", 0, -160 + i * 25, nil, TEXT_ALIGN_CENTER)
+                end
+            end
+
+            imgui.End3D2D()
+        end
+    end
+end
+```
