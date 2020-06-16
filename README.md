@@ -10,15 +10,27 @@ Immediate mode 3D2D UI for Garry's Mod. See some real-world uses [here](https://
 
 ### Installation
 
-Place `imgui.lua` somewhere in your addon or gamemode, eg. `myaddon/lua/myaddon/imgui.lua`.
-
-On _SERVER_ do `AddCSLuaFile("imgui.lua")`
-
-On _CLIENT_ (where you want to use imgui) do `local imgui = include("imgui.lua")`, and use through `imgui` object
+Place `imgui.lua` somewhere in your addon or gamemode (eg. `myaddon/lua/myaddon/imgui.lua`) and make sure it is `AddCSLuaFile`d and available to your clientside rendering code.
 
 ### Example
 
-Using it globally:
+Using with entities:
+```lua
+-- 3D2D UI should be rendered in translucent pass, so this should be either TRANSLUCENT or BOTH
+ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
+
+function ENT:DrawTranslucent()
+  -- While you can of course use the imgui.Start3D2D function for entities, IMGUI has some special syntax
+  -- This function automatically calls LocalToWorld and LocalToWorldAngles respectively on position and angles 
+  if imgui.Entity3D2D(self, Vector(0, 0, 50), Angle(0, 90, 90), 0.1) then
+    -- render things
+    
+    imgui.End3D2D()
+  end
+end
+```
+
+Using with gamemode rendering hooks:
 ```lua
 local imgui = include("imgui.lua") -- imgui.lua should be in same folder and AddCSLuaFile'd
 
@@ -56,21 +68,7 @@ hook.Add("PostDrawTranslucentRenderables", "PaintIMGUI", function(bDrawingSkybox
 end)
 ```
 
-Using it inside an entity:
-```lua
--- 3D2D UI should be rendered in translucent pass, so this should be either TRANSLUCENT or BOTH
-ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
-
-function ENT:DrawTranslucent()
-  -- While you can of course use the imgui.Start3D2D function for entities, IMGUI has some special syntax
-  -- This function automatically calls LocalToWorld and LocalToWorldAngles respectively on position and angles 
-  if imgui.Entity3D2D(self, Vector(0, 0, 50), Angle(0, 90, 90), 0.1) then
-    -- render things
-    
-    imgui.End3D2D()
-  end
-end
-```
+Prefer entities over global hooks, since they work better with [Source engine visiblity optimizations](https://developer.valvesoftware.com/wiki/Visibility_optimization).
 
 ### Debugging
 
