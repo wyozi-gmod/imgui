@@ -184,7 +184,9 @@ end
 function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
 	gState.entity = ent
 	local ret = imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
-	gState.entity = nil
+	if not ret then
+		gState.entity = nil	
+	end
 	return ret
 end
 
@@ -317,6 +319,8 @@ function imgui.End3D2D()
 		if _devMode then
 			drawDeveloperInfo()
 		end
+			
+		gState.entity = nil
 	end
 end
 
