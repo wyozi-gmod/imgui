@@ -185,7 +185,7 @@ function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
 	gState.entity = ent
 	local ret = imgui.Start3D2D(ent:LocalToWorld(lpos), ent:LocalToWorldAngles(lang), scale, ...)
 	if not ret then
-		gState.entity = nil	
+		gState.entity = nil
 	end
 	return ret
 end
