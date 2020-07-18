@@ -25,7 +25,7 @@ function imgui.Hook(name, id, callback)
 	hook.Add(name, "IMGUI / " .. id .. " / " .. hookUniqifier, callback)
 end
 
-local ply
+local localPlayer
 local gState = {}
 
 local function shouldAcceptInput()
@@ -63,7 +63,7 @@ local function isObstructed(eyePos, hitPos, ignoredEntity)
 	local q = traceQueryTable
 	q.start = eyePos
 	q.endpos = hitPos
-	q.filter[1] = ply
+	q.filter[1] = localPlayer
 	q.filter[2] = ignoredEntity
 
 	local tr = util.TraceLine(q)
@@ -75,8 +75,8 @@ local function isObstructed(eyePos, hitPos, ignoredEntity)
 end
 
 function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
-	if not ply then
-		ply = LocalPlayer()
+	if not localPlayer then
+		localPlayer = LocalPlayer()
 	end
 
 	if gState.shutdown == true then
@@ -94,7 +94,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 
 	_devMode = imgui.IsDeveloperMode()
 
-	local eyePos = ply:EyePos()
+	local eyePos = localPlayer:EyePos()
 	local eyePosToPos = pos - eyePos
 
 	-- OPTIMIZATION: Test that we are in front of the UI
@@ -138,7 +138,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 
 	-- calculate mousepos
 	if not vgui.CursorVisible() or vgui.IsHoveringWorld() then
-		local tr = ply:GetEyeTrace()
+		local tr = localPlayer:GetEyeTrace()
 		local eyepos = tr.StartPos
 		local eyenormal
 
@@ -264,7 +264,7 @@ local function developerText(str, x, y, clr)
 end
 
 local function drawDeveloperInfo()
-	local camAng = ply:EyeAngles()
+	local camAng = localPlayer:EyeAngles()
 	camAng:RotateAroundAxis(camAng:Right(), 90)
 	camAng:RotateAroundAxis(camAng:Up(), -90)
 
@@ -309,7 +309,7 @@ local function drawDeveloperInfo()
 	developerText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), 0, 75, devColours["ang"])
 	developerText(string.format("dot %d", gState._devDot or 0), 0, 88, devColours["dot"])
 
-	local angToEye = (pos - ply:EyePos()):Angle()
+	local angToEye = (pos - localPlayer:EyePos()):Angle()
 	angToEye:RotateAroundAxis(ang:Up(), -90)
 	angToEye:RotateAroundAxis(ang:Right(), 90)
 
