@@ -243,13 +243,15 @@ local function developerText(str, x, y, clr)
 	)
 end
 
+local devOffset = Vector(0, 0, 30)
+
 local function drawDeveloperInfo()
 	local camAng = LocalPlayer():EyeAngles()
 	camAng:RotateAroundAxis(camAng:Right(), 90)
 	camAng:RotateAroundAxis(camAng:Up(), -90)
 
 	cam.IgnoreZ(true)
-	cam.Start3D2D(gState.pos + Vector(0, 0, 30), camAng, 0.15)
+	cam.Start3D2D(gState.pos + devOffset, camAng, 0.15)
 	surface.SetDrawColor(0, 0, 0, 200)
 	surface.DrawRect(-100, 0, 200, 140)
 	developerText("imgui developer", 0, 5, Color(78, 205, 196))
