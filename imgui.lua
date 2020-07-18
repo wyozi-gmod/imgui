@@ -242,6 +242,7 @@ local function developerText(str, x, y, clr)
 		str, "DefaultFixedDropShadow", x, y, clr, TEXT_ALIGN_CENTER, nil
 	)
 end
+
 local function drawDeveloperInfo()
 	local camAng = LocalPlayer():EyeAngles()
 	camAng:RotateAroundAxis(camAng:Right(), 90)
@@ -294,7 +295,7 @@ local function drawDeveloperInfo()
 	if IsValid(ent) and ent._imguiRBExpansion then
 		local ex, ey, ew, eh = unpack(ent._imguiRBExpansion)
 		local minrb, maxrb = calculateRenderBounds(ex, ey, ew, eh)
-		render.DrawWireframeBox(Vector(0, 0, 0), Angle(0, 0, 0), minrb, maxrb, Color(0, 0, 255))
+		render.DrawWireframeBox(vector_origin, angle_zero, minrb, maxrb, Color(0, 0, 255))
 	end
 end
 
