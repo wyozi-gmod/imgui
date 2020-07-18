@@ -237,13 +237,26 @@ function imgui.ExpandRenderBoundsFromRect(x, y, w, h)
 	end
 end
 
+local devOffset = Vector(0, 0, 30)
+local devColours = {
+	background = Color(0, 0, 0, 200),
+	title = Color(78, 205, 196),
+	mouseHovered = Color(0, 255, 0),
+	mouseUnhovered = Color(255, 0, 0),
+	pos = Color(255, 255, 255),
+	distance = Color(200, 200, 200, 200),
+	ang = Color(255, 255, 255),
+	dot = Color(200, 200, 200, 200),
+	angleToEye = Color(200, 200, 200, 200),
+	renderTime = Color(255, 255, 255),
+	renderBounds = Color(0, 0, 255)
+}
+
 local function developerText(str, x, y, clr)
 	draw.SimpleText(
 		str, "DefaultFixedDropShadow", x, y, clr, TEXT_ALIGN_CENTER, nil
 	)
 end
-
-local devOffset = Vector(0, 0, 30)
 
 local function drawDeveloperInfo()
 	local camAng = LocalPlayer():EyeAngles()
@@ -252,43 +265,58 @@ local function drawDeveloperInfo()
 
 	cam.IgnoreZ(true)
 	cam.Start3D2D(gState.pos + devOffset, camAng, 0.15)
-	surface.SetDrawColor(0, 0, 0, 200)
+
+	local bgCol = devColours["background"]
+	surface.SetDrawColor(bgCol.r, bgCol.g, bgCol.b, bgCol.a)
 	surface.DrawRect(-100, 0, 200, 140)
-	developerText("imgui developer", 0, 5, Color(78, 205, 196))
-	surface.SetDrawColor(78, 205, 196)
+
+	local titleCol = devColours["title"]
+	developerText("imgui developer", 0, 5, titleCol)
+
+	surface.SetDrawColor(titleCol.r, titleCol.g, titleCol.b)
 	surface.DrawLine(-50, 16, 50, 16)
 
 	local mx, my = gState.mx, gState.my
 	if mx and my then
 		developerText(
 			string.format("mouse: hovering %d x %d", mx, my),
-			0, 20, Color(0, 255, 0)
+			0, 20, devColours["mouseHovered"]
 		)
 	else
 		developerText(
 			string.format("mouse: %s", gState._devInputBlocker or ""),
-			0, 20, Color(255, 0, 0)
+			0, 20, devColours["mouseUnhovered"]
 		)
 	end
 
 	local pos = gState.pos
-	developerText(string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z), 0, 40)
+	developerText(
+		string.format("pos: %.2f %.2f %.2f", pos.x, pos.y, pos.z),
+		0, 40, devColours["pos"]
+	)
+
 	developerText(
 		string.format("distance %.2f / %.2f", gState._devDist or 0, gState._devHideDist or 0),
-		0, 53, Color(200, 200, 200, 200)
+		0, 53, devColours["distance"]
 	)
 
 	local ang = gState.angles
-	developerText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), 0, 75)
-	developerText(string.format("dot %d", gState._devDot or 0), 0, 88, Color(200, 200, 200, 200))
+	developerText(string.format("ang: %.2f %.2f %.2f", ang.p, ang.y, ang.r), 0, 75, devColours["ang"])
+	developerText(string.format("dot %d", gState._devDot or 0), 0, 88, devColours["dot"])
 
 	local angToEye = (pos - LocalPlayer():EyePos()):Angle()
 	angToEye:RotateAroundAxis(ang:Up(), -90)
 	angToEye:RotateAroundAxis(ang:Right(), 90)
 
-	developerText(string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r), 0, 100)
+	developerText(
+		string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r),
+		0, 100, devColours["devColoursangleToEye"]
+	)
 
-	developerText(string.format("rendertime avg: %.2fms", (gState._devBenchAveraged or 0) * 1000), 0, 120)
+	developerText(
+		string.format("rendertime avg: %.2fms", (gState._devBenchAveraged or 0) * 1000),
+		0, 120, devColours["renderTime"]
+	)
 
 	cam.End3D2D()
 	cam.IgnoreZ(false)
@@ -297,7 +325,7 @@ local function drawDeveloperInfo()
 	if IsValid(ent) and ent._imguiRBExpansion then
 		local ex, ey, ew, eh = unpack(ent._imguiRBExpansion)
 		local minrb, maxrb = calculateRenderBounds(ex, ey, ew, eh)
-		render.DrawWireframeBox(vector_origin, angle_zero, minrb, maxrb, Color(0, 0, 255))
+		render.DrawWireframeBox(vector_origin, angle_zero, minrb, maxrb, devColours["renderBounds"])
 	end
 end
 
