@@ -315,7 +315,7 @@ local function drawDeveloperInfo()
 
 	developerText(
 		string.format("angle to eye (%d,%d,%d)", angToEye.p, angToEye.y, angToEye.r),
-		0, 100, devColours["devColoursangleToEye"]
+		0, 100, devColours["angleToEye"]
 	)
 
 	developerText(
