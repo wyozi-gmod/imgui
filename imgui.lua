@@ -75,7 +75,7 @@ local function isObstructed(eyePos, hitPos, ignoredEntity)
 end
 
 function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
-	if not localPlayer then
+	if not IsValid(localPlayer) then
 		localPlayer = LocalPlayer()
 	end
 
