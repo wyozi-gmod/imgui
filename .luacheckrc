@@ -25,7 +25,9 @@ std = {
         "string",
         "TEXT_ALIGN_CENTER",
         "Angle",
-        "tonumber"
+        "tonumber",
+        "vector_origin",
+        "angle_zero",
     }
 }
 ignore = {"611"}
