@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   luacheck:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     steps:
       - uses: actions/checkout@v2
       - uses: leafo/gh-actions-lua@v5
