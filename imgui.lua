@@ -45,8 +45,13 @@ end
 imgui.Hook("PreRender", "Input", function()
 	-- calculate mouse state
 	if shouldAcceptInput() then
+		local useBind = input.LookupBinding("+use", true)
+		local attackBind = input.LookupBinding("+attack", true)
+		local USE = useBind and input.GetKeyCode(useBind)
+		local ATTACK = attackBind and input.GetKeyCode(attackBind)
+
 		local wasPressing = gState.pressing
-		gState.pressing = input.IsMouseDown(MOUSE_LEFT) or input.IsKeyDown(KEY_E)
+		gState.pressing = (USE and input.IsButtonDown(USE)) or (ATTACK and input.IsButtonDown(ATTACK))
 		gState.pressed = not wasPressing and gState.pressing
 	end
 end)
