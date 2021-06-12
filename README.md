@@ -131,8 +131,8 @@ local wasPressed = imgui.xButton(x, y, w, h, borderWidth, borderClr, hoverClr, p
 
 Draws a button with text inside. The `font` parameter is passed through `imgui.xFont`, so special font syntax is supported.
 The text is automatically centered within the button.
-```lua
-local wasPressed = imgui.xTextButton(text, font, x, y, w, h, color, hoverColor, pressColor)
+```lua 
+local wasPressed = imgui.xTextButton(text, font, x, y, w, h, borderWidth, color, hoverClr, pressColor)
 ```
 
 Draws a cursor IF the cursor is within given bounds. Note: `x`,`y`,`w`,`h` should be the bounds for your whole IMGUI interface, eg. `0, 0, 512, 512` if you draw into the 3d2d space within those bounds.
