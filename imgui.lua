@@ -35,7 +35,7 @@ local function shouldAcceptInput()
 	end
 
 	-- don't process input if we're doing VGUI stuff (and not in context menu)
-	if vgui.CursorVisible() and vgui.GetHoveredPanel() ~= g_ContextMenu then
+	if vgui.CursorVisible() and vgui.GetHoveredPanel() ~= g_ContextMenu and not vgui.IsHoveringWorld() then
 		return false
 	end
 
@@ -148,7 +148,7 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 		local eyenormal
 
 		if vgui.CursorVisible() and vgui.IsHoveringWorld() then
-			eyenormal = gui.ScreenToVector(gui.MousePos())
+			eyenormal = imgui.ScreenToVector(input.GetCursorPos())
 		else
 			eyenormal = tr.Normal
 		end
@@ -189,6 +189,26 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 	if _devMode then gState._renderStarted = SysTime() end
 
 	return true
+end
+
+function imgui.ScreenToVector(x, y)
+	local view = render.GetViewSetup()
+	local w, h = ScrW(), ScrH()
+	local fov = view.fov
+	if gState.weapon then
+		fov = view.fovviewmodel
+	end
+
+	return util.AimVector(view.angles, fov, x, y, w, h)
+end
+
+function imgui.Weapon3D2D(weapon, pos, ang, scale, ...)
+	gState.weapon = weapon
+	local ret = imgui.Start3D2D(pos, ang, scale, ...)
+	if not ret then
+		gState.weapon = nil
+	end
+	return ret
 end
 
 function imgui.Entity3D2D(ent, lpos, lang, scale, ...)
@@ -362,6 +382,7 @@ function imgui.End3D2D()
 		end
 
 		gState.entity = nil
+		gState.weapon = nil
 	end
 end
 
