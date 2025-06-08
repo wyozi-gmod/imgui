@@ -21,7 +21,15 @@ end
 local _devMode = false -- cached local variable updated once in a while
 
 function imgui.Hook(name, id, callback)
-	local hookUniqifier = debug.getinfo(4).short_src
+	-- find deepest known source
+	local shortsrc = "unknown"
+	for i=0,4 do
+		if debug.getinfo(i) then
+			shortsrc = debug.getinfo(i).short_src
+		end
+	end
+
+	local hookUniqifier = shortsrc
 	hook.Add(name, "IMGUI / " .. id .. " / " .. hookUniqifier, callback)
 end
 
@@ -167,7 +175,12 @@ function imgui.Start3D2D(pos, angles, scale, distanceHide, distanceFadeStart)
 
 		local hitPos = util.IntersectRayWithPlane(eyepos, eyenormal, pos, planeNormal)
 		if hitPos then
-			local obstructed, obstructer = isObstructed(eyepos, hitPos, gState.entity, true)
+			local obstructed, obstructer = false, nil
+
+			if gState.entity then
+				local obstructed, obstructer = isObstructed(eyepos, hitPos, gState.entity, true)
+			end
+			
 			if obstructed then
 				gState.mx = nil
 				gState.my = nil
